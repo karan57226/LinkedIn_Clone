@@ -61,6 +61,23 @@ npm run dev
 
 Open the Vite URL. The frontend calls the backend at `http://localhost:8000` unless you set `VITE_API_BASE_URL`.
 
+## Run With Docker
+
+```bash
+docker compose up --build
+```
+
+Then open:
+
+```text
+Frontend: http://localhost:5173
+Backend:  http://localhost:8000/health
+```
+
+The Docker setup runs PostgreSQL locally so the app behaves more like the future AWS RDS deployment.
+
+See [docs/dockerisation.md](docs/dockerisation.md) for the deployment mapping.
+
 ## API
 
 - `GET /health`
