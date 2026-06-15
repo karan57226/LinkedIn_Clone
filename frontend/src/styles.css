@@ -57,6 +57,11 @@ h2 {
   font-size: 1rem;
 }
 
+h3 {
+  margin: 0;
+  font-size: 0.98rem;
+}
+
 .iconButton {
   display: inline-grid;
   width: 42px;
@@ -189,8 +194,257 @@ h2 {
   color: #5b6b70;
 }
 
+.deployment {
+  display: grid;
+  gap: 18px;
+  margin-top: 34px;
+  padding-top: 28px;
+  border-top: 1px solid #d5ddd9;
+}
+
+.sectionIntro {
+  max-width: 760px;
+}
+
+.sectionIntro h2 {
+  margin: 0 0 10px;
+  font-size: clamp(1.7rem, 3vw, 2.4rem);
+  line-height: 1.1;
+}
+
+.sectionIntro p:last-child {
+  margin-bottom: 0;
+  color: #516367;
+  line-height: 1.55;
+}
+
+.architectureGrid {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.9fr) minmax(360px, 1.4fr);
+  gap: 18px;
+  align-items: stretch;
+}
+
+.flowPanel,
+.vpcDiagram,
+.securityPanel,
+.runtimePanel {
+  border: 1px solid #d7ded9;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 8px 22px rgba(40, 54, 58, 0.06);
+}
+
+.flowPanel {
+  padding: 18px;
+}
+
+.flowLine {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.flowNode {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 46px;
+  padding: 10px 12px;
+  border: 1px solid #cdd8d5;
+  border-radius: 8px;
+  color: #183f45;
+  background: #f7faf8;
+  font-weight: 700;
+}
+
+.flowNode:not(:last-child)::after {
+  position: absolute;
+  bottom: -13px;
+  left: 29px;
+  width: 2px;
+  height: 13px;
+  background: #87a7a2;
+  content: "";
+}
+
+.vpcDiagram {
+  padding: 18px;
+  background: #fbfcfa;
+}
+
+.diagramHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.diagramHeader span {
+  display: block;
+  margin-top: 3px;
+  color: #5b6b70;
+  font-size: 0.88rem;
+}
+
+.vpcBox {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  padding: 14px;
+  border: 2px solid #9dbdb8;
+  border-radius: 8px;
+  background: #edf6f4;
+}
+
+.azColumn {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px dashed #8bb0aa;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.65);
+}
+
+.azColumn > strong {
+  color: #163f46;
+  font-size: 0.92rem;
+}
+
+.diagramBox {
+  display: grid;
+  gap: 4px;
+  min-height: 76px;
+  padding: 11px;
+  border-radius: 8px;
+  border: 1px solid;
+}
+
+.diagramBox span {
+  font-weight: 800;
+}
+
+.diagramBox small {
+  color: #526266;
+  line-height: 1.35;
+}
+
+.diagramBox.public {
+  border-color: #94bdd6;
+  background: #e7f2f7;
+}
+
+.diagramBox.app {
+  border-color: #c5c487;
+  background: #f1f1dc;
+}
+
+.diagramBox.db {
+  border-color: #c3a5a1;
+  background: #f3e8e6;
+}
+
+.securityPanel,
+.runtimePanel {
+  padding: 18px;
+}
+
+.securityPanel > div,
+.runtimePanel > div:first-child {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 12px;
+  color: #183f45;
+}
+
+.securityPanel ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-left: 20px;
+  color: #415155;
+  line-height: 1.45;
+}
+
+.stepsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.stepCard {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  min-height: 190px;
+  padding: 14px;
+  border: 1px solid #d7ded9;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 8px 22px rgba(40, 54, 58, 0.06);
+}
+
+.stepCard > span {
+  color: #6d7d7f;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.stepCard svg {
+  color: #2f7a69;
+}
+
+.stepCard p {
+  margin-bottom: 0;
+  color: #526266;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.runtimeList {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.runtimeItem {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  border-radius: 8px;
+  background: #f3f6f2;
+}
+
+.runtimeItem svg {
+  color: #285d63;
+}
+
+.runtimeItem strong {
+  color: #253438;
+}
+
+.runtimeItem span {
+  color: #5b6b70;
+  font-size: 0.86rem;
+  line-height: 1.35;
+}
+
 @media (max-width: 860px) {
   .layout {
     grid-template-columns: 1fr;
+  }
+
+  .architectureGrid,
+  .vpcBox,
+  .stepsGrid,
+  .runtimeList {
+    grid-template-columns: 1fr;
+  }
+
+  .stepCard {
+    min-height: 0;
   }
 }
