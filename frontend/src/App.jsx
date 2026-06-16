@@ -93,7 +93,7 @@ function App() {
     <main className="shell">
       <header className="topbar">
         <div>
-          <p className="eyebrow">Deployment learning app</p>
+          <p className="eyebrow">Production deployment app</p>
           <h1>SmallScale - Linkedin Production Deployment</h1>
         </div>
         <button className="iconButton" type="button" onClick={loadData} aria-label="Refresh data">

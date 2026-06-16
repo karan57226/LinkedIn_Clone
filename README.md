@@ -78,6 +78,18 @@ The Docker setup runs PostgreSQL locally so the app behaves more like the future
 
 See [docs/dockerisation.md](docs/dockerisation.md) for the deployment mapping.
 
+## CI/CD Pipeline
+
+GitHub Actions workflow:
+
+```text
+.github/workflows/ci-cd.yml
+```
+
+The pipeline runs backend unit tests, builds the frontend, and pushes Docker images to ECR on pushes to `main`.
+
+See [docs/devops-pipeline.md](docs/devops-pipeline.md) for setup details.
+
 ## API
 
 - `GET /health`
