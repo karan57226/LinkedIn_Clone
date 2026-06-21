@@ -10,6 +10,7 @@ import {
   Layers3,
   Lock,
   MapPin,
+  Plus,
   RefreshCw,
   Route,
   Server,
@@ -17,7 +18,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import { getFeed, getJobs, getProfiles } from "./api";
+import { createJob, createPost, createProfile, getFeed, getJobs, getProfiles } from "./api";
 
 const deploymentSteps = [
   {
@@ -67,6 +68,7 @@ function App() {
   const [jobs, setJobs] = useState([]);
   const [profiles, setProfiles] = useState([]);
   const [status, setStatus] = useState("loading");
+  const [formStatus, setFormStatus] = useState("");
 
   async function loadData() {
     setStatus("loading");
@@ -88,6 +90,27 @@ function App() {
   useEffect(() => {
     loadData();
   }, []);
+
+  async function handleCreateProfile(profile) {
+    setFormStatus("Saving person...");
+    await createProfile(profile);
+    await loadData();
+    setFormStatus("Person added to RDS.");
+  }
+
+  async function handleCreatePost(postBody) {
+    setFormStatus("Publishing post...");
+    await createPost(postBody);
+    await loadData();
+    setFormStatus("Post added to the feed.");
+  }
+
+  async function handleCreateJob(job) {
+    setFormStatus("Saving job...");
+    await createJob(job);
+    await loadData();
+    setFormStatus("Job added.");
+  }
 
   return (
     <main className="shell">
@@ -114,72 +137,249 @@ function App() {
           {status === "loading" ? "Loading network data..." : `API error: ${status}`}
         </section>
       ) : (
-        <div className="layout">
-          <aside className="sidebar">
-            <section>
-              <h2>People</h2>
+        <>
+          <CreatePanel
+            profiles={profiles}
+            status={formStatus}
+            onCreateJob={handleCreateJob}
+            onCreatePost={handleCreatePost}
+            onCreateProfile={handleCreateProfile}
+            onError={(message) => setFormStatus(message)}
+          />
+
+          <div className="layout">
+            <aside className="sidebar">
+              <section>
+                <h2>People</h2>
+                <div className="stack">
+                  {profiles.map((profile) => (
+                    <article className="person" key={profile.id}>
+                      <img src={profile.avatar_url} alt="" />
+                      <div>
+                        <strong>{profile.name}</strong>
+                        <span>{profile.title}</span>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </section>
+            </aside>
+
+            <section className="feed">
+              <h2>Feed</h2>
               <div className="stack">
-                {profiles.map((profile) => (
-                  <article className="person" key={profile.id}>
-                    <img src={profile.avatar_url} alt="" />
-                    <div>
-                      <strong>{profile.name}</strong>
-                      <span>{profile.title}</span>
+                {feed.map((post) => (
+                  <article className="post" key={post.id}>
+                    <div className="postHeader">
+                      <img src={post.author.avatar_url} alt="" />
+                      <div>
+                        <strong>{post.author.name}</strong>
+                        <span>{post.author.title}</span>
+                      </div>
                     </div>
+                    <p>{post.body}</p>
                   </article>
                 ))}
               </div>
             </section>
-          </aside>
 
-          <section className="feed">
-            <h2>Feed</h2>
-            <div className="stack">
-              {feed.map((post) => (
-                <article className="post" key={post.id}>
-                  <div className="postHeader">
-                    <img src={post.author.avatar_url} alt="" />
-                    <div>
-                      <strong>{post.author.name}</strong>
-                      <span>{post.author.title}</span>
-                    </div>
-                  </div>
-                  <p>{post.body}</p>
-                </article>
-              ))}
-            </div>
-          </section>
-
-          <aside className="sidebar">
-            <section>
-              <h2>Jobs</h2>
-              <div className="stack">
-                {jobs.map((job) => (
-                  <article className="job" key={job.id}>
-                    <div className="jobIcon">
-                      <BriefcaseBusiness size={18} />
-                    </div>
-                    <div>
-                      <strong>{job.role}</strong>
-                      <span>
-                        <Building2 size={14} />
-                        {job.company.name}
-                      </span>
-                      <span>
-                        <MapPin size={14} />
-                        {job.location} · {job.work_mode}
-                      </span>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            </section>
-          </aside>
-        </div>
+            <aside className="sidebar">
+              <section>
+                <h2>Jobs</h2>
+                <div className="stack">
+                  {jobs.map((job) => (
+                    <article className="job" key={job.id}>
+                      <div className="jobIcon">
+                        <BriefcaseBusiness size={18} />
+                      </div>
+                      <div>
+                        <strong>{job.role}</strong>
+                        <span>
+                          <Building2 size={14} />
+                          {job.company.name}
+                        </span>
+                        <span>
+                          <MapPin size={14} />
+                          {job.location} · {job.work_mode}
+                        </span>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </section>
+            </aside>
+          </div>
+        </>
       )}
 
       <DeploymentStory />
     </main>
+  );
+}
+
+function CreatePanel({ profiles, status, onCreateJob, onCreatePost, onCreateProfile, onError }) {
+  const [activeForm, setActiveForm] = useState("post");
+  const [profileForm, setProfileForm] = useState({
+    name: "",
+    title: "",
+    location: "",
+    avatar_url: ""
+  });
+  const [postForm, setPostForm] = useState({ author_id: "", body: "" });
+  const [jobForm, setJobForm] = useState({
+    role: "",
+    location: "",
+    work_mode: "Hybrid",
+    company_name: "",
+    company_industry: "Technology"
+  });
+
+  async function submitProfile(event) {
+    event.preventDefault();
+    try {
+      await onCreateProfile({
+        ...profileForm,
+        avatar_url: profileForm.avatar_url || undefined
+      });
+      setProfileForm({ name: "", title: "", location: "", avatar_url: "" });
+    } catch (error) {
+      onError(`Could not add person: ${error.message}`);
+    }
+  }
+
+  async function submitPost(event) {
+    event.preventDefault();
+    try {
+      await onCreatePost({
+        author_id: Number(postForm.author_id),
+        body: postForm.body
+      });
+      setPostForm({ author_id: "", body: "" });
+    } catch (error) {
+      onError(`Could not publish post: ${error.message}`);
+    }
+  }
+
+  async function submitJob(event) {
+    event.preventDefault();
+    try {
+      await onCreateJob(jobForm);
+      setJobForm({
+        role: "",
+        location: "",
+        work_mode: "Hybrid",
+        company_name: "",
+        company_industry: "Technology"
+      });
+    } catch (error) {
+      onError(`Could not add job: ${error.message}`);
+    }
+  }
+
+  return (
+    <section className="createPanel">
+      <div className="createHeader">
+        <div>
+          <p className="eyebrow">Write to RDS</p>
+          <h2>Add Network Data</h2>
+        </div>
+        <div className="formTabs" role="tablist" aria-label="Create data type">
+          <button className={activeForm === "post" ? "active" : ""} type="button" onClick={() => setActiveForm("post")}>
+            Post
+          </button>
+          <button className={activeForm === "person" ? "active" : ""} type="button" onClick={() => setActiveForm("person")}>
+            Person
+          </button>
+          <button className={activeForm === "job" ? "active" : ""} type="button" onClick={() => setActiveForm("job")}>
+            Job
+          </button>
+        </div>
+      </div>
+
+      {activeForm === "person" && (
+        <form className="dataForm" onSubmit={submitProfile}>
+          <label>
+            Name
+            <input required value={profileForm.name} onChange={(event) => setProfileForm({ ...profileForm, name: event.target.value })} />
+          </label>
+          <label>
+            Title
+            <input required value={profileForm.title} onChange={(event) => setProfileForm({ ...profileForm, title: event.target.value })} />
+          </label>
+          <label>
+            Location
+            <input required value={profileForm.location} onChange={(event) => setProfileForm({ ...profileForm, location: event.target.value })} />
+          </label>
+          <label>
+            Avatar URL
+            <input value={profileForm.avatar_url} onChange={(event) => setProfileForm({ ...profileForm, avatar_url: event.target.value })} />
+          </label>
+          <button type="submit">
+            <Plus size={16} />
+            Add person
+          </button>
+        </form>
+      )}
+
+      {activeForm === "post" && (
+        <form className="dataForm postForm" onSubmit={submitPost}>
+          <label>
+            Author
+            <select required value={postForm.author_id} onChange={(event) => setPostForm({ ...postForm, author_id: event.target.value })}>
+              <option value="">Select a person</option>
+              {profiles.map((profile) => (
+                <option key={profile.id} value={profile.id}>
+                  {profile.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="wideField">
+            Post
+            <textarea required rows="3" value={postForm.body} onChange={(event) => setPostForm({ ...postForm, body: event.target.value })} />
+          </label>
+          <button type="submit">
+            <Plus size={16} />
+            Publish post
+          </button>
+        </form>
+      )}
+
+      {activeForm === "job" && (
+        <form className="dataForm" onSubmit={submitJob}>
+          <label>
+            Role
+            <input required value={jobForm.role} onChange={(event) => setJobForm({ ...jobForm, role: event.target.value })} />
+          </label>
+          <label>
+            Company
+            <input required value={jobForm.company_name} onChange={(event) => setJobForm({ ...jobForm, company_name: event.target.value })} />
+          </label>
+          <label>
+            Industry
+            <input required value={jobForm.company_industry} onChange={(event) => setJobForm({ ...jobForm, company_industry: event.target.value })} />
+          </label>
+          <label>
+            Location
+            <input required value={jobForm.location} onChange={(event) => setJobForm({ ...jobForm, location: event.target.value })} />
+          </label>
+          <label>
+            Work mode
+            <select value={jobForm.work_mode} onChange={(event) => setJobForm({ ...jobForm, work_mode: event.target.value })}>
+              <option>Hybrid</option>
+              <option>Remote</option>
+              <option>On-site</option>
+            </select>
+          </label>
+          <button type="submit">
+            <Plus size={16} />
+            Add job
+          </button>
+        </form>
+      )}
+
+      {status && <p className="formStatus">{status}</p>}
+    </section>
   );
 }
 

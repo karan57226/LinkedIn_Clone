@@ -17,6 +17,29 @@ button {
   font: inherit;
 }
 
+input,
+select,
+textarea {
+  width: 100%;
+  border: 1px solid #cbd5d2;
+  border-radius: 8px;
+  color: #1d2528;
+  background: #ffffff;
+  font: inherit;
+}
+
+input,
+select {
+  min-height: 40px;
+  padding: 0 10px;
+}
+
+textarea {
+  min-height: 86px;
+  padding: 10px;
+  resize: vertical;
+}
+
 .shell {
   width: min(1180px, calc(100% - 32px));
   margin: 0 auto;
@@ -92,6 +115,99 @@ h3 {
   grid-template-columns: minmax(190px, 0.8fr) minmax(320px, 1.6fr) minmax(230px, 1fr);
   gap: 18px;
   align-items: start;
+}
+
+.createPanel {
+  margin-bottom: 20px;
+  padding: 16px;
+  border: 1px solid #d7ded9;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 8px 22px rgba(40, 54, 58, 0.06);
+}
+
+.createHeader {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 14px;
+}
+
+.createHeader h2 {
+  margin-bottom: 0;
+  font-size: 1.25rem;
+}
+
+.formTabs {
+  display: inline-flex;
+  padding: 3px;
+  border: 1px solid #cad3d0;
+  border-radius: 8px;
+  background: #f3f6f2;
+}
+
+.formTabs button {
+  min-width: 74px;
+  min-height: 34px;
+  border: 0;
+  border-radius: 6px;
+  color: #53666a;
+  background: transparent;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.formTabs button.active {
+  color: #143f46;
+  background: #ffffff;
+  box-shadow: 0 1px 4px rgba(40, 54, 58, 0.1);
+}
+
+.dataForm {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) auto;
+  gap: 12px;
+  align-items: end;
+}
+
+.postForm {
+  grid-template-columns: minmax(180px, 0.6fr) minmax(260px, 1.4fr) auto;
+}
+
+.dataForm label {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  color: #526266;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.wideField {
+  min-width: 0;
+}
+
+.dataForm button[type="submit"] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 8px;
+  color: #ffffff;
+  background: #285d63;
+  cursor: pointer;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.formStatus {
+  margin: 12px 0 0;
+  color: #526266;
+  font-size: 0.9rem;
 }
 
 .sidebar,
@@ -440,8 +556,14 @@ h3 {
   .architectureGrid,
   .vpcBox,
   .stepsGrid,
-  .runtimeList {
+  .runtimeList,
+  .dataForm,
+  .postForm {
     grid-template-columns: 1fr;
+  }
+
+  .createHeader {
+    display: grid;
   }
 
   .stepCard {

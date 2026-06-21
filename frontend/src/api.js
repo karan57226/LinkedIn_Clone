@@ -10,6 +10,22 @@ async function request(path) {
   return response.json();
 }
 
+async function post(path, body) {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(body)
+  });
+
+  if (!response.ok) {
+    throw new Error(`Request failed: ${response.status}`);
+  }
+
+  return response.json();
+}
+
 export function getFeed() {
   return request("/api/feed");
 }
@@ -20,4 +36,16 @@ export function getProfiles() {
 
 export function getJobs() {
   return request("/api/jobs");
+}
+
+export function createProfile(profile) {
+  return post("/api/profiles", profile);
+}
+
+export function createPost(postBody) {
+  return post("/api/posts", postBody);
+}
+
+export function createJob(job) {
+  return post("/api/jobs", job);
 }
