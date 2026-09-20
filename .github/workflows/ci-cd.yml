@@ -5,6 +5,21 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      service:
+        description: Service to restore to its previous container
+        required: true
+        type: choice
+        options: [backend, frontend]
+
+permissions:
+  contents: read
+
+# Serialize releases and rollbacks; never cancel an active deployment.
+concurrency:
+  group: linkedin-${{ github.event_name == 'pull_request' && github.ref || 'production' }}
+  cancel-in-progress: false
 
 env:
   AWS_REGION: us-west-1
@@ -16,6 +31,7 @@ jobs:
   test:
     name: Test and build
     runs-on: ubuntu-latest
+    if: github.event_name != 'workflow_dispatch'
 
     steps:
       - name: Checkout
@@ -34,6 +50,9 @@ jobs:
         working-directory: backend
         run: pytest
 
+      - name: Test deployment recovery
+        run: python -m unittest discover -s tests -v
+
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
@@ -50,8 +69,9 @@ jobs:
         run: npm run build
 
   deploy:
-    name: Build and push Docker images
+    name: Publish and deploy to EC2
     runs-on: ubuntu-latest
+    timeout-minutes: 55
     needs: test
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     permissions:
@@ -82,7 +102,9 @@ jobs:
           push: true
           build-args: |
             VITE_API_BASE_URL=
-          tags: ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.FRONTEND_ECR_REPOSITORY }}:latest
+          tags: |
+            ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.FRONTEND_ECR_REPOSITORY }}:${{ github.sha }}
+            ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.FRONTEND_ECR_REPOSITORY }}:latest
 
       - name: Build and push backend image
         uses: docker/build-push-action@v6
@@ -90,4 +112,37 @@ jobs:
           context: ./backend
           platforms: linux/amd64
           push: true
-          tags: ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.BACKEND_ECR_REPOSITORY }}:latest
+          tags: |
+            ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.BACKEND_ECR_REPOSITORY }}:${{ github.sha }}
+            ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.BACKEND_ECR_REPOSITORY }}:latest
+
+      - name: Deploy backend and check database access
+        run: python3 scripts/deploy_ssm.py backend deploy
+
+      - name: Deploy frontend
+        run: python3 scripts/deploy_ssm.py frontend deploy
+
+      - name: Check application through load balancer
+        run: |
+          python3 scripts/check_public.py
+
+  rollback:
+    name: Restore previous container
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_GITHUB_ACTIONS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Restore selected service
+        env:
+          SERVICE: ${{ inputs.service }}
+        run: python3 scripts/deploy_ssm.py "$SERVICE" rollback
+      - name: Check application through load balancer
+        run: python3 scripts/check_public.py

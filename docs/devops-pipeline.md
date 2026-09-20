@@ -1,5 +1,7 @@
 # DevOps Pipeline
 
+> This document describes the original image-publishing setup. For the new SSM deployment workflow, prerequisites, rollback, and limitations, see [EC2 deployment](ec2-deployment.md).
+
 This project can use GitHub Actions as the CI/CD pipeline.
 
 ## What The Pipeline Does
